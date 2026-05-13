@@ -87,13 +87,7 @@ https://gdr-sys.github.io/7th-sea-dice-roller/
 # Possibili Miglioramenti Futuri
 
 - cronologia tiri
-- statistiche probabilistiche
 - modalità dark/light
-- temi personalizzati
-- effetti sonori
-- animazioni dadi
-- esportazione risultati
-- multiplayer
 - integrazione scheda personaggio
 - supporto multilingua
 
