@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dice Matcher V12 - Zero Waste</title>
+    <style>
+        :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --accent: #f59e0b; --success: #10b981; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 15px; margin: 0; }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 380px; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; }
+        input[type="number"], select { width: 100%; padding: 12px; background: #0f172a; border: 2px solid #334155; border-radius: 12px; color: white; font-size: 1rem; margin-top: 5px; box-sizing: border-box; }
+        .option-tile { display: flex; align-items: center; background: #0f3460; border: 2px solid #334155; padding: 12px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
+        .option-tile.active { border-color: var(--primary); background: #0c4a6e; }
+        button { width: 100%; padding: 18px; background: var(--primary); color: #0f172a; border: none; border-radius: 15px; font-weight: 800; font-size: 1.1rem; margin-top: 10px; }
+        button.reroll { background: var(--accent); margin-top: 5px; display: none; }
+        #results { width: 100%; max-width: 380px; margin-top: 25px; }
+        .die { display: inline-flex; width: 45px; height: 45px; align-items: center; justify-content: center; background: #334155; border: 2px solid var(--primary); border-radius: 10px; margin: 5px; font-weight: bold; font-size: 1.2rem; cursor: pointer; position: relative; }
+        .die.selected { border-color: var(--accent); transform: scale(1.1); box-shadow: 0 0 15px var(--accent); }
+        .ext-badge { position: absolute; top: -5px; right: -5px; background: #fbbf24; color: #000; font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; }
+        .set { background: #064e3b; border-left: 5px solid var(--success); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .set-10 { border-left-color: #fbbf24; background: #422006; }
+        .waste { background: #450a0a; border-left-color: #ef4444; color: #fecaca; padding: 12px; border-radius: 12px; }
+        .sum-badge { background: var(--success); color: #064e3b; padding: 4px 10px; border-radius: 8px; font-weight: 800; }
+        .badge-10 { background: #fbbf24; color: #422006; }
+        h3 { font-size: 0.8rem; color: var(--primary); text-transform: uppercase; margin: 20px 0 10px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="grid">
+            <div><label>N. Dadi</label><input type="number" id="count" value="5"></div>
+            <div>
+                <label>Obiettivo</label>
+                <select id="target" onchange="render()">
+                    <option value="10">Somma 10</option>
+                    <option value="15">Somma 15 (+10)</option>
+                </select>
+            </div>
+        </div>
+        <label class="option-tile" id="tile1"><input type="checkbox" id="plus1" onchange="uS('tile1', this)"><span class="option-label">Aggiungi +1</span></label>
+        <label class="option-tile" id="tile2"><input type="checkbox" id="expl" onchange="uS('tile2', this)"><span class="option-label">Esplosione del 10</span></label>
+        
+        <button onclick="firstRoll()">LANCIA DADI</button>
+        <button id="rerollBtn" class="reroll" onclick="rerollSelected()">RILANCIA SELEZIONATI</button>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        let currentDice = [];
+        function uS(id, cb) { document.getElementById(id).classList.toggle('active', cb.checked); }
+
+        function rollSingle(isExtra = false) {
+            const p1 = document.getElementById('plus1').checked;
+            const r = Math.floor(Math.random() * 10) + 1;
+            return { val: r + (p1 ? 1 : 0), natural: r, exploded: isExtra, selected: false };
+        }
+
+        function firstRoll() {
+            const n = parseInt(document.getElementById('count').value) || 0;
+            currentDice = [];
+            for (let i = 0; i < n; i++) {
+                let d = rollSingle(false);
+                currentDice.push(d);
+                if (document.getElementById('expl').checked && d.natural === 10) rollExtra();
+            }
+            render();
+        }
+
+        function rollExtra() {
+            let extra = rollSingle(true);
+            currentDice.push(extra);
+            if (extra.natural === 10) rollExtra();
+        }
+
+        function toggleSelect(index) {
+            currentDice[index].selected = !currentDice[index].selected;
+            render();
+        }
+
+        function rerollSelected() {
+            let keptDice = currentDice.filter(d => !d.selected);
+            let selectedCount = currentDice.filter(d => d.selected).length;
+            currentDice = keptDice;
+            for(let i=0; i<selectedCount; i++) {
+                let d = rollSingle(false);
+                currentDice.push(d);
+                if (document.getElementById('expl').checked && d.natural === 10) rollExtra();
+            }
+            render();
+        }
+
+        function findBestPartition(dice, targetMode) {
+            let bestResult = { sets: [], leftovers: dice, score: -Infinity };
+
+            function solve(remaining, currentSets) {
+                let foundAny = false;
+
+                // Esplora combinazioni partendo da quelle con meno dadi (più efficienti)
+                for (let size = 1; size <= remaining.length; size++) {
+                    let combinations = getCombinations(remaining, size);
+                    for (let combo of combinations) {
+                        let sum = combo.reduce((a, b) => a + b, 0);
+                        let type = 0;
+
+                        if (targetMode === 15) {
+                            if (sum >= 15) type = 15;
+                            else if (sum >= 10) type = 10;
+                        } else if (sum >= 10) {
+                            type = 10;
+                        }
+
+                        if (type > 0) {
+                            foundAny = true;
+                            let nextRemaining = [...remaining];
+                            combo.forEach(val => {
+                                let idx = nextRemaining.indexOf(val);
+                                nextRemaining.splice(idx, 1);
+                            });
+
+                            currentSets.push({ v: combo, t: sum, type: type });
+                            solve(nextRemaining, currentSets);
+                            currentSets.pop();
+                        }
+                    }
+                }
+
+                // Valutazione finale della partizione
+                let score = currentSets.length * 10000; // Priorità al numero di set
+                currentSets.forEach(s => {
+                    if (s.type === 15) score += 5000; // Bonus per i 15
+                    // PENALITÀ SPRECO: Più superi il 10 o 15, più perdi punti
+                    score -= (s.t - s.type) * 100; 
+                });
+                score -= remaining.length * 500; // Penalità per dadi inutilizzati
+
+                if (score > bestResult.score) {
+                    bestResult.score = score;
+                    bestResult.sets = JSON.parse(JSON.stringify(currentSets));
+                    bestResult.leftovers = [...remaining];
+                }
+            }
+
+            function getCombinations(arr, k) {
+                let results = [];
+                function helper(start, current) {
+                    if (current.length === k) {
+                        results.push([...current]);
+                        return;
+                    }
+                    for (let i = start; i < arr.length; i++) {
+                        current.push(arr[i]);
+                        helper(i + 1, current);
+                        current.pop();
+                    }
+                }
+                helper(0, []);
+                return results;
+            }
+
+            solve(dice.sort((a, b) => a - b), []);
+            return bestResult;
+        }
+
+        function render() {
+            if (currentDice.length === 0) return;
+            const target = parseInt(document.getElementById('target').value);
+            const resDiv = document.getElementById('results');
+            document.getElementById('rerollBtn').style.display = currentDice.some(d => d.selected) ? 'block' : 'none';
+
+            let html = '<h3>Dadi Lanciati</h3><div style="text-align:center;">';
+            currentDice.forEach((d, i) => {
+                html += `<div class="die ${d.selected ? 'selected' : ''}" onclick="toggleSelect(${i})">
+                            ${d.val}${d.exploded ? '<span class="ext-badge">EXT</span>' : ''}
+                         </div>`;
+            });
+
+            const pool = currentDice.map(d => d.val);
+            const result = findBestPartition(pool, target);
+
+            html += '</div><h3>Combinazioni Ottimizzate</h3>';
+            result.sets.sort((a,b) => b.type - a.type).forEach(s => {
+                let isTen = (s.type === 10 && target === 15);
+                html += `<div class="set ${isTen ? 'set-10' : ''}">
+                            <span>${s.v.join(' + ')}</span>
+                            <span class="sum-badge ${isTen ? 'badge-10' : ''}">${s.t}</span>
+                         </div>`;
+            });
+
+            if (result.leftovers.length > 0) {
+                html += `<div class="waste">Scarti: ${result.leftovers.join(', ')}</div>`;
+            }
+            resDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
