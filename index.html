@@ -188,7 +188,12 @@
 
                 const totalInc = currentSets.reduce((acc, s) => acc + s.inc, 0);
                 const totalWaste = currentSets.reduce((acc, s) => acc + (s.t - s.type), 0);
-                const score = (totalInc * 1000000) - (totalWaste * 100) - remaining.length;
+                
+                // NUOVA LOGICA DI PUNTEGGIO:
+                // 1. Priorità massima agli Incrementi.
+                // 2. Priorità secondaria al numero di dadi SCARTATI (remaining.length).
+                // 3. Penalità minima allo spreco di punti (totalWaste) per "pulizia".
+                const score = (totalInc * 1000000) + (remaining.length * 1000) - (totalWaste * 1);
 
                 if (score > best.score) {
                     best.score = score;
