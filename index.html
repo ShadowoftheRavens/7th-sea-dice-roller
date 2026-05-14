@@ -25,8 +25,12 @@
         .card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 380px; box-sizing: border-box; border: 1px solid var(--border); }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: 800; }
-        input[type="number"], select { width: 100%; padding: 12px; background: var(--input-bg); border: 2px solid var(--border); border-radius: 12px; color: var(--text); font-size: 1rem; margin-top: 5px; box-sizing: border-box; }
+        input[type="number"], select { width: 100%; padding: 12px; background: var(--input-bg); border: 2px solid var(--border); border-radius: 12px; color: var(--text); font-size: 1rem; margin-top: 5px; box-sizing: border-box; outline: none; }
         
+        .bonus-section { background: var(--input-bg); border: 2px solid var(--border); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .bonus-section span { font-size: 0.85rem; font-weight: 600; }
+        .bonus-section select { width: auto; margin-top: 0; padding: 5px 10px; }
+
         .option-tile { display: flex; align-items: center; background: var(--input-bg); border: 2px solid var(--border); padding: 12px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; font-size: 0.85rem; }
         .option-tile.active { border-color: var(--primary); background: rgba(56, 189, 248, 0.1); }
         
@@ -69,7 +73,19 @@
                 </select>
             </div>
         </div>
-        <label class="option-tile" id="tile1"><input type="checkbox" id="plus1" onchange="uS('tile1', this)"><span>Aggiungi +1 ad ogni dado</span></label>
+
+        <div class="bonus-section">
+            <span>Aggiungi bonus a ogni dado:</span>
+            <select id="bonusValue">
+                <option value="0">0</option>
+                <option value="1">+1</option>
+                <option value="2">+2</option>
+                <option value="3">+3</option>
+                <option value="4">+4</option>
+                <option value="5">+5</option>
+            </select>
+        </div>
+
         <label class="option-tile" id="tile2"><input type="checkbox" id="expl" onchange="uS('tile2', this)"><span>Esplosione del 10</span></label>
         
         <button class="main-btn" onclick="firstRoll()">LANCIA DADI</button>
@@ -94,9 +110,9 @@
         function uS(id, cb) { document.getElementById(id).classList.toggle('active', cb.checked); }
 
         function rollSingle(isExtra = false) {
-            const p1 = document.getElementById('plus1').checked;
+            const bonus = parseInt(document.getElementById('bonusValue').value);
             const r = Math.floor(Math.random() * 10) + 1;
-            return { val: r + (p1 ? 1 : 0), natural: r, exploded: isExtra, selected: false };
+            return { val: r + bonus, natural: r, exploded: isExtra, selected: false };
         }
 
         function firstRoll() {
