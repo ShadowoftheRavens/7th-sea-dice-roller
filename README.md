@@ -98,10 +98,7 @@ https://gdr-sys.github.io/7th-sea-dice-roller/
 
 # Possibili Miglioramenti Futuri
 
-- cronologia tiri
-- modalità dark/light
 - integrazione scheda personaggio
-- supporto multilingua
 
 ---
 

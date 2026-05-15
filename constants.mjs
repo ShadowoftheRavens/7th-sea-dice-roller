@@ -21,6 +21,8 @@ export const UI_LABELS = {
     COMBINATIONS: 'Combinazioni',
     LEFTOVERS: 'Scarti',
     LEFTOVERS_LABEL: 'Scarti: ',
+    HISTORY: 'Cronologia',
+    HISTORY_EMPTY: 'Nessun lancio ancora.',
 };
 
 // CSS Class Names
@@ -36,6 +38,11 @@ export const CSS_CLASSES = {
     INCREMENT_BADGE: 'inc-badge',
     ACTIVE: 'active',
     SUMMARY_BOX: 'summary-box',
+    HISTORY_SECTION: 'history',
+    HISTORY_EMPTY: 'history-empty',
+    HISTORY_ITEM: 'history-item',
+    HISTORY_META: 'history-meta',
+    HISTORY_DICE: 'history-dice',
 };
 
 // DOM Element IDs
@@ -58,4 +65,11 @@ export const DOM_ATTRIBUTES = {
     THEME_LIGHT: 'light',
     DATA_INDEX: 'data-index',
     DATA_DIE_ID: 'data-die-id',
+};
+
+// Footer Credits
+export const FOOTER_CREDITS = {
+    NOEMI_NAME: 'Noemi Marcolini',
+    NOEMI_EMAIL: 'mailto:noemi.marcolini@gmail.com',
+    EXTENSIONS_AUTHOR: 'Shadow of the Ravens',
 };

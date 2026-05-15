@@ -9,23 +9,27 @@
 <body data-theme="dark">
 
     <div class="header-tools">
+        <select id="languageSelector" class="language-selector">
+            <option value="en" selected>EN</option>
+            <option value="it">IT</option>
+        </select>
         <div class="theme-toggle" id="themeToggle">TEMA 🌓</div>
     </div>
 
     <div class="card">
         <div class="grid">
-            <div><label>N. Dadi</label><input type="number" id="count" value="5"></div>
+            <div><label id="labelNumDice">N. Dadi</label><input type="number" id="count" value="5"></div>
             <div>
-                <label>Obiettivo</label>
+                <label id="labelTarget">Obiettivo</label>
                 <select id="target">
-                    <option value="10">Somma 10</option>
-                    <option value="15">Somma 15 (+10)</option>
+                    <option value="10" id="optionSum10">Somma 10</option>
+                    <option value="15" id="optionSum15">Somma 15 (+10)</option>
                 </select>
             </div>
         </div>
 
         <div class="bonus-section">
-            <span>Aggiungi bonus a ogni dado:</span>
+            <span id="labelBonus">Aggiungi bonus a ogni dado:</span>
             <select id="bonusValue">
                 <option value="0">0</option>
                 <option value="1">+1</option>
@@ -36,16 +40,19 @@
             </select>
         </div>
 
-        <label class="option-tile" id="tile2"><input type="checkbox" id="expl"><span>Esplosione del 10</span></label>
+        <label class="option-tile" id="tile2"><input type="checkbox" id="expl"><span id="explosionLabel">Esplosione del 10</span></label>
         
         <button class="main-btn" id="rollBtn">LANCIA DADI</button>
         <button id="rerollBtn" class="reroll">RILANCIA SELEZIONATO</button>
     </div>
 
+    <div id="history-sidebar"></div>
+
     <div id="results"></div>
 
     <footer class="footer-noemi">
-        <p>Progetto e idea di <a href="mailto:noemi.marcolini@gmail.com" class="link-noemi">Noemi Marcolini</a></p>
+        <p><span id="footerProjectLabel">Project and idea by</span> <a id="footerNoemiLink" href="mailto:noemi.marcolini@gmail.com" class="link-noemi"><span id="footerNoemiName">Noemi Marcolini</span></a></p>
+        <p id="footerExtensions">Extensions by Shadow of the Ravens</p>
     </footer>
 
     <script type="module" src="./app.mjs"></script>
